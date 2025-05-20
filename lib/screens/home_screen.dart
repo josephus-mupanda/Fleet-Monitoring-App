@@ -76,8 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }).toSet();
   }
-
-  // ── Search + filter logic ────────────────────────────────────────────────
+  //
+  // // ── Search + filter logic ────────────────────────────────────────────────
   List<Car> _applySearchAndFilter(List<Car> cars) {
     final provider = context.read<CarProvider>();
 
@@ -207,28 +207,41 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Bottom‑sheet for status filter
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------
 class _FilterSheet extends StatelessWidget {
   final String? current;
-
   const _FilterSheet({required this.current});
 
   @override
   Widget build(BuildContext context) {
-    final items = ['All', 'Moving', 'Parked'];
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: items.map((e) {
-        return ListTile(
-          // leading: ,
-          title: Text(e, style: Theme.of(context).textTheme.bodyMedium),
-          trailing:
-          current == (e == 'All' ? null : e) ? const Icon(Icons.check) : null,
-          onTap: () => Navigator.pop(context, e),
-        );
-      }).toList(),
+    final items = [
+      ('All', Icons.list_alt, Colors.orange),
+      ('Moving', Icons.directions_car_filled, Colors.green),
+      ('Parked', Icons.directions_car_filled, Colors.blue),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: items.map((e) {
+          final label = e.$1;
+          final icon = e.$2;
+          final color = e.$3;
+          final selected = current == (label == 'All' ? null : label);
+
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundColor: color.withOpacity(0.15),
+              child: Icon(icon, color: color),
+            ),
+            title: Text(label, style: Theme.of(context).textTheme.bodyLarge),
+            trailing: selected ? Icon(Icons.check, color: color) : null,
+            onTap: () => Navigator.pop(context, label),
+          );
+        }).toList(),
+      ),
     );
   }
 }

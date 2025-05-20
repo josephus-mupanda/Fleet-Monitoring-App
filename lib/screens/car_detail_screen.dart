@@ -40,26 +40,28 @@ class CarDetailScreen extends StatelessWidget {
                             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                           ),
                           CircleAvatar(
-                            backgroundColor: Theme
-                                .of(context)
-                                .cardColor,
+                            backgroundColor: Theme.of(context).cardColor,
                             radius: 25,
                             child: Icon(
-                              FeatherIcons.user,
+                              Icons.directions_car_filled,
                               size: 25,
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                              color:  car.status == 'Moving' ? Colors.green : Colors.blue
                             ),
                           ),
                           const SizedBox(width: Constants.kDefaultPadding),
                           Text(
-                            '${car.name} Details',
+                            "${car.name}'s Details",
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const Spacer(),
                           Chip(
-                            label: Text(car.status),
-                            backgroundColor:
-                            car.status == 'Moving' ? Colors.green : Colors.grey,
+                            label: Text(car.status,
+                              style: TextStyle(
+                                color: car.status == 'Moving' ?
+                                Colors.green : Colors.blue
+                              ),
+                            ),
+                            backgroundColor: car.status == 'Moving' ? Colors.green.withOpacity(0.15) : Colors.blue.withOpacity(0.15),
                           ),
                         ],
                       ),
