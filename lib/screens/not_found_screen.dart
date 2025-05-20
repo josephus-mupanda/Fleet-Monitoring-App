@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
-import '../../../core/constants/constants.dart';
 import '../../../core/utils/images.dart';
 import '../core/config/constants.dart';
 
 class NotFoundScreen extends StatefulWidget {
-
   const NotFoundScreen({super.key});
 
   @override
