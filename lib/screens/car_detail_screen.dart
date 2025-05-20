@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CarDetailScreen extends StatefulWidget {
 
-  final String carId;
+  final int carId;
 
   const CarDetailScreen({super.key, required this.carId});
 

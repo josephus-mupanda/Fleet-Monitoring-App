@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -98,9 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Consumer<CarProvider>(
           builder: (_, provider, __) {
             _maybeFollowTracked(provider);
-
             final cars = _applySearchAndFilter(provider.cars);
-
             return Stack(
               children: [
                 // ── MAP ───────────────────────────────────────────────────
@@ -121,12 +118,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     elevation: 4,
                     borderRadius: BorderRadius.circular(8),
                     child: TextField(
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Search by name or ID',
-                        prefixIcon: const Icon(Icons.search),
+                        prefixIcon: Icon(Icons.search),
                         border: InputBorder.none,
                         contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 16),
+                        EdgeInsets.symmetric(horizontal: 16),
                       ),
                       onChanged: (v) => setState(() => _searchQuery = v),
                     ),
