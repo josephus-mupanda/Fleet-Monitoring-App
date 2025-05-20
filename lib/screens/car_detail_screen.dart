@@ -1,3 +1,4 @@
+import 'package:fleet_monitoring_app/screens/components/button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
@@ -16,9 +17,7 @@ class CarDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     final ThemeData theme = Theme.of(context);
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Car Details')),
       body: Container(
         constraints: const BoxConstraints(maxWidth: Constants.kMaxWidth ?? double.infinity),
         child: Consumer<CarProvider>(
@@ -30,7 +29,7 @@ class CarDetailScreen extends StatelessWidget {
             final bool isTracked = provider.trackedCarId == carId;
             return SafeArea(
               child: Column(
-                children: [
+                children: <Widget>[
                   Container(
                     color: Theme.of(context).colorScheme.background,
                     child: Padding(
@@ -57,70 +56,73 @@ class CarDetailScreen extends StatelessWidget {
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const Spacer(),
+                          Chip(
+                            label: Text(car.status),
+                            backgroundColor:
+                            car.status == 'Moving' ? Colors.green : Colors.grey,
+                          ),
                         ],
                       ),
                     ),
                   ),
                   // ── Info row ───────────────────────────────────────────
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(car.name,
-                          style:
-                          const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                      Chip(
-                        label: Text(car.status),
-                        backgroundColor:
-                        car.status == 'Moving' ? Colors.green : Colors.grey,
+                  Expanded(
+                    child: Container(
+                      height: size.height,
+                      width: size.width,
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.speed, size: 18),
-                      const SizedBox(width: 4),
-                      Text('${car.speed.toStringAsFixed(0)} km/h'),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // ── Mini‑map ──────────────────────────────────────────
-                  SizedBox(
-                    height: 200,
-                    child: GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: LatLng(car.latitude, car.longitude),
-                        zoom: 16,
-                      ),
-                      markers: {
-                        Marker(
-                          markerId: MarkerId(car.id.toString()),
-                          position: LatLng(car.latitude, car.longitude),
-                          infoWindow: InfoWindow(title: car.name),
+                      child: Padding(
+                        padding: const EdgeInsets.all(Constants.kDefaultPadding),
+                        child: ListView(
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.speed, size: 18),
+                                const SizedBox(width: 4),
+                                Text('${car.speed.toStringAsFixed(0)} km/h'),
+                              ],
+                            ),
+                            const SizedBox(height: Constants.kDefaultPadding),
+                            SizedBox(
+                              height: 200,
+                              child: GoogleMap(
+                                initialCameraPosition: CameraPosition(
+                                  target: LatLng(car.latitude, car.longitude),
+                                  zoom: 16,
+                                ),
+                                markers: {
+                                  Marker(
+                                    markerId: MarkerId(car.id.toString()),
+                                    position: LatLng(car.latitude, car.longitude),
+                                    infoWindow: InfoWindow(title: car.name),
+                                  ),
+                                },
+                                zoomControlsEnabled: false,
+                                myLocationButtonEnabled: false,
+                                liteModeEnabled: true, // lightweight map
+                              ),
+                            ),
+                            const SizedBox(height: Constants.kDefaultPadding),
+                            const Spacer(),
+                            // ── Track / Stop button ──────────────────────────────
+                            AppButton(
+                              onPressed: (){
+                                if (isTracked) {
+                                  provider.stopTracking();
+                                } else {
+                                  provider.trackCar(carId);
+                                  Navigator.pop(context);
+                                }
+                              },
+                              color: isTracked? Theme.of(context).primaryColor: Theme.of(context).colorScheme.background,
+                              text: isTracked ? 'Stop Tracking' : 'Track This Car',
+                            )
+                          ],
                         ),
-                      },
-                      zoomControlsEnabled: false,
-                      myLocationButtonEnabled: false,
-                      liteModeEnabled: true, // lightweight map
-                    ),
-                  ),
-                  const Spacer(),
-
-                  // ── Track / Stop button ──────────────────────────────
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      if (isTracked) {
-                        provider.stopTracking();
-                      } else {
-                        provider.trackCar(carId);
-                        Navigator.pop(context); // go back to map
-                      }
-                    },
-                    icon: Icon(isTracked ? Icons.pause : Icons.play_arrow),
-                    label: Text(isTracked ? 'Stop Tracking' : 'Track This Car'),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 48),
+                      ),
                     ),
                   ),
                 ],
