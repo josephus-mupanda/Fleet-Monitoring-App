@@ -12,9 +12,8 @@ import 'core/routes/route_generator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Only load the .env file if NOT running on the web
   if (!kIsWeb) {
-    await dotenv.load(); // reads .env
+    await dotenv.load(); // reads .env for android
   }
   await Preferences.init();
 

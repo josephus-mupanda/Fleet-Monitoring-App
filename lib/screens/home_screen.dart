@@ -182,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       : choice);
                                 }
                               },
-                              child: const Icon(Icons.filter_list,color: Colors.white, ),
+                              child: Icon(Icons.filter_list,color: theme.colorScheme.onSurface.withOpacity(0.5)),
                             ),
                           ),
                         ],
