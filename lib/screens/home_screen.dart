@@ -111,80 +111,94 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (_, provider, __) {
             _maybeFollowTracked(provider);
             final cars = _applySearchAndFilter(provider.cars);
-            return Stack(
-              children: [
-                // ── MAP ───────────────────────────────────────────────────
-                GoogleMap(
-                  initialCameraPosition: _initialCamera,
-                  myLocationEnabled: true,
-                  markers: _buildMarkers(cars),
-                  onMapCreated: (c) => _mapController = c,
-                  onCameraMove: _onCameraMove,
-                ),
-
-                // ── SEARCH BAR ──────────────────────────────────────────
-                Positioned(
-                  top: Constants.kDefaultPadding,
-                  left: Constants.kDefaultPadding,
-                  right: Constants.kDefaultPadding,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: Constants.kDefaultPadding),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: SearchWidget(
-                            hintText: 'Search a car by name or ID',
-                            keyboardType: TextInputType.name,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                Icons.search,
-                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+            return RefreshIndicator(
+              onRefresh: () async {
+                await provider.fetchCars(context);
+              },
+              child: Stack(
+                children: [
+                  ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        // MAP
+                        child: GoogleMap(
+                          initialCameraPosition: _initialCamera,
+                          myLocationEnabled: true,
+                          markers: _buildMarkers(cars),
+                          onMapCreated: (c) => _mapController = c,
+                          onCameraMove: _onCameraMove,
+                        ),
+                      ),
+                    ],
+                  ),
+              
+                  // SEARCH BAR
+                  Positioned(
+                    top: Constants.kDefaultPadding,
+                    left: Constants.kDefaultPadding,
+                    right: Constants.kDefaultPadding,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: Constants.kDefaultPadding),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: SearchWidget(
+                              hintText: 'Search a car by name or ID',
+                              keyboardType: TextInputType.name,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  Icons.search,
+                                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                ),
+                                onPressed: () {},
                               ),
-                              onPressed: () {},
+                              onChanged: (v) => setState(() => _searchQuery = v),
+              
+                              validator: (String? value) {},
                             ),
-                            onChanged: (v) => setState(() => _searchQuery = v),
-
-                            validator: (String? value) {},
                           ),
-                        ),
-                        const SizedBox(width: Constants.kDefaultPadding,),
-                        // ── FILTER BUTTON ──────────────────────────────────────
-                        Positioned(
-                          top: 80,
-                          right: 16,
-                          child: FloatingActionButton.small(
-                            heroTag: 'filterBtn',
-                            onPressed: () async {
-                              final choice = await showModalBottomSheet(
-                                context: context,
-                                backgroundColor: Theme.of(context).cardColor,
-                                builder: (BuildContext context) {
-                                  return  _FilterSheet(current: _statusFilter);
-                                },
-                              );
-
-                              if (choice != null) {
-                                setState(() => _statusFilter = choice == 'All'
-                                    ? null
-                                    : choice);
-                              }
-                            },
-                            child: const Icon(Icons.filter_list,color: Colors.white, ),
+                          const SizedBox(width: Constants.kDefaultPadding,),
+                          // ── FILTER BUTTON ──────────────────────────────────────
+                          Positioned(
+                            top: 80,
+                            right: 16,
+                            child: FloatingActionButton.small(
+                              heroTag: 'filterBtn',
+                              backgroundColor:  Theme.of(context).cardColor,
+                              onPressed: () async {
+                                final choice = await showModalBottomSheet(
+                                  context: context,
+                                  backgroundColor: Theme.of(context).cardColor,
+                                  builder: (BuildContext context) {
+                                    return  _FilterSheet(current: _statusFilter);
+                                  },
+                                );
+              
+                                if (choice != null) {
+                                  setState(() => _statusFilter = choice == 'All'
+                                      ? null
+                                      : choice);
+                                }
+                              },
+                              child: const Icon(Icons.filter_list,color: Colors.white, ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-
-                // if (provider.isLoading)
-                //   const Positioned(
-                //     bottom: 20,
-                //     left: 0,
-                //     right: 0,
-                //     child: Center(child: CircularProgressIndicator()),
-                //   ),
-              ],
+              
+                  // if (provider.isLoading)
+                  //   const Positioned(
+                  //     bottom: 20,
+                  //     left: 0,
+                  //     right: 0,
+                  //     child: Center(child: CircularProgressIndicator()),
+                  //   ),
+                ],
+              ),
             );
           },
         ),
