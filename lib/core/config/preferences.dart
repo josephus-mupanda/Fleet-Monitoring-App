@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/car.dart';
+import '../../models/car.dart';
 import 'dart:convert';
 
 class Preferences {
@@ -7,7 +7,6 @@ class Preferences {
 
   // Keys
   static const _keyCachedCars = 'cached_cars';
-  static const _keyThemeMode = 'theme_mode';
   static const _keyLastLocationLat = 'last_location_lat';
   static const _keyLastLocationLng = 'last_location_lng';
   static const _keyLastLocationZoom = 'last_location_zoom';
@@ -48,15 +47,6 @@ class Preferences {
         lastUpdated: DateTime.parse(json['lastUpdated']),
       );
     }).toList();
-  }
-
-  // Theme
-  static Future setThemeMode(bool isDark) async {
-    await _preferences?.setBool(_keyThemeMode, isDark);
-  }
-
-  static bool? getThemeMode() {
-    return _preferences?.getBool(_keyThemeMode);
   }
 
   // Map position

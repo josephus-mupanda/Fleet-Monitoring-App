@@ -1,20 +1,28 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import '../core/config/preferences.dart';
+import '../core/utils/toast.dart';
 import '../models/car.dart';
-import '../services/api_service.dart';
-import '../services/preferences.dart';
+import '../services/car_service.dart';
 
 class CarProvider with ChangeNotifier {
   List<Car> _cars = [];
   bool _isLoading = false;
   String? _error;
-  String? _trackedCarId;
+  int? _trackedCarId;
 
   List<Car> get cars => _cars;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  String? get trackedCarId => _trackedCarId;
+  int? get trackedCarId => _trackedCarId;
 
-  final ApiService _apiService = ApiService();
+  final CarService _carService = CarService();
+  Timer? _pollingTimer;
+  BuildContext? _context;
+
+  void setContext(BuildContext context) {
+    _context = context;
+  }
 
   CarProvider() {
     _init();
@@ -25,50 +33,70 @@ class CarProvider with ChangeNotifier {
     _startPolling();
   }
 
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    _context = null;
+    super.dispose();
+  }
+
   Future<void> _loadCachedData() async {
     try {
       final cachedCars = await Preferences.getCachedCars();
-      if (cachedCars != null && cachedCars.isNotEmpty) {
+      if (cachedCars != null) {
         _cars = cachedCars;
         notifyListeners();
       }
     } catch (e) {
-      debugPrint('Error loading cached data: $e');
+      debugPrint('Cache load error: $e');
     }
   }
 
   void _startPolling() {
-    fetchCars();
-    Timer.periodic(AppConfig.locationUpdateInterval, (timer) => fetchCars());
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) => _safeFetchCars(),);
+
+    _safeFetchCars();
   }
 
-  Future<void> fetchCars() async {
-    _setLoading(true);
-
-    try {
-      final newCars = await _apiService.fetchCars();
-      _cars = newCars;
-      _error = null;
-      await Preferences.setCachedCars(newCars);
-    } catch (e) {
-      _error = e.toString();
-      if (_cars.isEmpty) {
-        final cachedCars = await Preferences.getCachedCars();
-        if (cachedCars != null) {
-          _cars = cachedCars;
-        }
-      }
-    } finally {
-      _setLoading(false);
+  Future<void> _safeFetchCars() async {
+    if (_context != null && _context!.mounted) {
+      await fetchCars(_context!);
     }
   }
 
-  void _setLoading(bool loading) {
-    _isLoading = loading;
+  Future<void> fetchCars(BuildContext context) async {
+    if (_isLoading) return;
+
+    _isLoading = true;
     notifyListeners();
+
+    try {
+      final cars = await _carService.getCars(context);
+      if (cars != null) {
+        _cars = cars;
+        _error = null;
+        await Preferences.setCachedCars(cars);
+      } else if (_cars.isEmpty) {
+        // Only show error if we have no cached data
+        _error = 'Failed to load cars';
+        if (context.mounted) {
+          showErrorToast(context, "Failed to load cars'");
+        }
+      }
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('Fetch error: $e');
+      if (context.mounted && _cars.isEmpty) {
+        showErrorToast(context, 'Error: ${e.toString()}');
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  void trackCar(String carId) {
+  void trackCar(int carId) {
     _trackedCarId = carId;
     notifyListeners();
   }
@@ -78,16 +106,24 @@ class CarProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  List<Car> filterCars(String? status) {
-    if (status == null) return _cars;
+  Car? getCarById(int id) {
+    try {
+      return _cars.firstWhere((car) => car.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  List<Car> filterByStatus(String? status) {
+    if (status == null || status.isEmpty) return _cars;
     return _cars.where((car) => car.status == status).toList();
   }
 
-  List<Car> searchCars(String query) {
+  List<Car> search(String query) {
     if (query.isEmpty) return _cars;
+    final q = query.toLowerCase();
     return _cars.where((car) =>
-    car.name.toLowerCase().contains(query.toLowerCase()) ||
-        car.id.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    car.name.toLowerCase().contains(q) ||
+        car.id.toString().contains(q)).toList();
   }
 }
