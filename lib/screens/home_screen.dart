@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../core/config/constants.dart';
 import '../core/config/preferences.dart';
+import '../core/utils/loading.dart';
 import '../models/car.dart';
 import '../providers/car_provider.dart';
 import 'car_detail_screen.dart';
@@ -21,10 +22,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   GoogleMapController? _mapController;
+
   String _searchQuery = '';
   String? _statusFilter; // 'Moving', 'Parked', or null
-  CameraPosition _initialCamera =
-  const CameraPosition(target: LatLng(-1.95, 30.06), zoom: 13);
+  CameraPosition _initialCamera = const CameraPosition(target: LatLng(-1.95, 30.06), zoom: 13);
 
   // preload marker icons
   late BitmapDescriptor _movingIcon;
@@ -63,12 +64,11 @@ class _HomeScreenState extends State<HomeScreen> {
   // ── Build marker set ─────────────────────────────────────────────────────
   Set<Marker> _buildMarkers(List<Car> cars) {
     return cars.map((car) {
-      final icon = car.status == 'Moving' ? _movingIcon : _parkedIcon;
       return Marker(
         markerId: MarkerId(car.id.toString()),
         position: LatLng(car.latitude, car.longitude),
         infoWindow: InfoWindow(title: car.name, snippet: '${car.speed} km/h'),
-        icon: icon,
+        icon:  car.status == 'Moving' ? _movingIcon : _parkedIcon,
         onTap: () {
           Navigator.pushNamed(context,
               AppRoute.carDetail, arguments: car.id);
@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }).toSet();
   }
-  //
+
   // // ── Search + filter logic ────────────────────────────────────────────────
   List<Car> _applySearchAndFilter(List<Car> cars) {
     final provider = context.read<CarProvider>();
@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: SafeArea(
         child: Consumer<CarProvider>(
-          builder: (_, provider, __) {
+          builder: (context, provider, __) {
             _maybeFollowTracked(provider);
             final cars = _applySearchAndFilter(provider.cars);
             return RefreshIndicator(

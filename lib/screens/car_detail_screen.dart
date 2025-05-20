@@ -81,13 +81,17 @@ class CarDetailScreen extends StatelessWidget {
                         child: ListView(
                           children: [
                             Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.speed, size: 18),
-                                const SizedBox(width: 4),
-                                Text('${car.speed.toStringAsFixed(0)} km/h'),
+                                Icon(Icons.speed, size: 50, color:  car.status == 'Moving' ? Colors.green : Colors.blue ,),
+                                const SizedBox(width: Constants.kDefaultPadding/2),
+                                Text('${car.speed.toStringAsFixed(0)} km/h',
+                                  style: Theme.of(context).textTheme.bodyLarge,),
                               ],
                             ),
-                            const SizedBox(height: Constants.kDefaultPadding),
+                            const SizedBox(height: Constants.kDefaultPadding*1.5),
                             SizedBox(
                               height: 200,
                               child: GoogleMap(
@@ -107,9 +111,8 @@ class CarDetailScreen extends StatelessWidget {
                                 liteModeEnabled: true, // lightweight map
                               ),
                             ),
-                            const SizedBox(height: Constants.kDefaultPadding),
-                            const Spacer(),
-                            // ── Track / Stop button ──────────────────────────────
+                            const SizedBox(height: Constants.kDefaultPadding*3),
+                            // ── Track / Stop button
                             AppButton(
                               onPressed: (){
                                 if (isTracked) {
