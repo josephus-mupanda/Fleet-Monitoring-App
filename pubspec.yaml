@@ -48,11 +48,19 @@ dev_dependencies:
 
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.3.10
 
 flutter_icons:
   android: true
   ios: true
   image_path: "assets/images/icons/logo.png"
+
+flutter_native_splash:
+  color: "#262837"
+  image: assets/images/icons/logo.png
+  android: true
+  ios: true
+  fullscreen: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
