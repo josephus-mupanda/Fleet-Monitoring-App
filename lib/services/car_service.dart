@@ -10,7 +10,7 @@ class CarService {
   Future<List<Car>?> getCars(BuildContext context) async {
     try {
       final response = await http.get(
-        Uri.parse(AppConfig.apiBaseUrl),
+        Uri.parse(AppConfig.carsEndpoint),
         headers: {'Accept': 'application/json'},
       );
 

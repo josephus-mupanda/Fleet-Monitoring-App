@@ -7,7 +7,7 @@ import '../models/car.dart';
 import '../providers/car_provider.dart';
 
 class CarDetailScreen extends StatelessWidget {
-  final int carId;
+  final String carId;
   const CarDetailScreen({super.key, required this.carId});
 
   @override

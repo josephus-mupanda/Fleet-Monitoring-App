@@ -1,9 +1,6 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 class AppConfig {
   static const String appName = 'Fleet Monitoring';
-  static const String apiBaseUrl = 'https://mockapi.io/projects';
-  static const String carsEndpoint = '/cars';
-  // static  String mapsKey = dotenv.env['GOOGLE_MAPS_API_KEY']!;
+  static const String apiBaseUrl = 'https://682c65ecd29df7a95be6de38.mockapi.io';
+  static const String carsEndpoint = '$apiBaseUrl/cars';
   static const String fontFamily = 'Poppins';
 }

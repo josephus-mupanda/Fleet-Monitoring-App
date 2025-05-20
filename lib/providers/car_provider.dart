@@ -9,12 +9,12 @@ class CarProvider with ChangeNotifier {
   List<Car> _cars = [];
   bool _isLoading = false;
   String? _error;
-  int? _trackedCarId;
+  String? _trackedCarId; // Changed from int? to String?
 
   List<Car> get cars => _cars;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  int? get trackedCarId => _trackedCarId;
+  String? get trackedCarId => _trackedCarId;
 
   final CarService _carService = CarService();
   Timer? _pollingTimer;
@@ -54,8 +54,7 @@ class CarProvider with ChangeNotifier {
 
   void _startPolling() {
     _pollingTimer?.cancel();
-    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) => _safeFetchCars(),);
-
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) => _safeFetchCars());
     _safeFetchCars();
   }
 
@@ -78,10 +77,9 @@ class CarProvider with ChangeNotifier {
         _error = null;
         await Preferences.setCachedCars(cars);
       } else if (_cars.isEmpty) {
-        // Only show error if we have no cached data
         _error = 'Failed to load cars';
         if (context.mounted) {
-          showErrorToast(context, "Failed to load cars'");
+          showErrorToast(context, "Failed to load cars");
         }
       }
     } catch (e) {
@@ -96,7 +94,7 @@ class CarProvider with ChangeNotifier {
     }
   }
 
-  void trackCar(int carId) {
+  void trackCar(String carId) {
     _trackedCarId = carId;
     notifyListeners();
   }
@@ -106,7 +104,7 @@ class CarProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Car? getCarById(int id) {
+  Car? getCarById(String id) {
     try {
       return _cars.firstWhere((car) => car.id == id);
     } catch (e) {
@@ -124,6 +122,129 @@ class CarProvider with ChangeNotifier {
     final q = query.toLowerCase();
     return _cars.where((car) =>
     car.name.toLowerCase().contains(q) ||
-        car.id.toString().contains(q)).toList();
+        car.id.toLowerCase().contains(q)).toList(); // id is now String
   }
 }
+
+// class CarProvider with ChangeNotifier {
+//   List<Car> _cars = [];
+//   bool _isLoading = false;
+//   String? _error;
+//   int? _trackedCarId;
+//
+//   List<Car> get cars => _cars;
+//   bool get isLoading => _isLoading;
+//   String? get error => _error;
+//   int? get trackedCarId => _trackedCarId;
+//
+//   final CarService _carService = CarService();
+//   Timer? _pollingTimer;
+//   BuildContext? _context;
+//
+//   void setContext(BuildContext context) {
+//     _context = context;
+//   }
+//
+//   CarProvider() {
+//     _init();
+//   }
+//
+//   Future<void> _init() async {
+//     await _loadCachedData();
+//     _startPolling();
+//   }
+//
+//   @override
+//   void dispose() {
+//     _pollingTimer?.cancel();
+//     _context = null;
+//     super.dispose();
+//   }
+//
+//   Future<void> _loadCachedData() async {
+//     try {
+//       final cachedCars = await Preferences.getCachedCars();
+//       if (cachedCars != null) {
+//         _cars = cachedCars;
+//         notifyListeners();
+//       }
+//     } catch (e) {
+//       debugPrint('Cache load error: $e');
+//     }
+//   }
+//
+//   void _startPolling() {
+//     _pollingTimer?.cancel();
+//     _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) => _safeFetchCars(),);
+//
+//     _safeFetchCars();
+//   }
+//
+//   Future<void> _safeFetchCars() async {
+//     if (_context != null && _context!.mounted) {
+//       await fetchCars(_context!);
+//     }
+//   }
+//
+//   Future<void> fetchCars(BuildContext context) async {
+//     if (_isLoading) return;
+//
+//     _isLoading = true;
+//     notifyListeners();
+//
+//     try {
+//       final cars = await _carService.getCars(context);
+//       if (cars != null) {
+//         _cars = cars;
+//         _error = null;
+//         await Preferences.setCachedCars(cars);
+//       } else if (_cars.isEmpty) {
+//         // Only show error if we have no cached data
+//         _error = 'Failed to load cars';
+//         if (context.mounted) {
+//           showErrorToast(context, "Failed to load cars'");
+//         }
+//       }
+//     } catch (e) {
+//       _error = e.toString();
+//       debugPrint('Fetch error: $e');
+//       if (context.mounted && _cars.isEmpty) {
+//         showErrorToast(context, 'Error: ${e.toString()}');
+//       }
+//     } finally {
+//       _isLoading = false;
+//       notifyListeners();
+//     }
+//   }
+//
+//   void trackCar(int carId) {
+//     _trackedCarId = carId;
+//     notifyListeners();
+//   }
+//
+//   void stopTracking() {
+//     _trackedCarId = null;
+//     notifyListeners();
+//   }
+//
+//   Car? getCarById(int id) {
+//     try {
+//       return _cars.firstWhere((car) => car.id == id);
+//     } catch (e) {
+//       return null;
+//     }
+//   }
+//
+//   List<Car> filterByStatus(String? status) {
+//     if (status == null || status.isEmpty) return _cars;
+//     return _cars.where((car) => car.status == status).toList();
+//   }
+//
+//   List<Car> search(String query) {
+//     if (query.isEmpty) return _cars;
+//     final q = query.toLowerCase();
+//     return _cars.where((car) =>
+//     car.name.toLowerCase().contains(q) ||
+//         car.id.toString().contains(q)).toList();
+//   }
+//}

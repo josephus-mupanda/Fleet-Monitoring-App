@@ -1,5 +1,6 @@
 import 'package:fleet_monitoring_app/core/themes/app_theme.dart';
 import 'package:fleet_monitoring_app/providers/car_provider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -10,8 +11,11 @@ import 'core/routes/app_route.dart';
 import 'core/routes/route_generator.dart';
 
 void main() async {
-  await dotenv.load();                       // <‑‑ reads .env
   WidgetsFlutterBinding.ensureInitialized();
+  // Only load the .env file if NOT running on the web
+  if (!kIsWeb) {
+    await dotenv.load(); // reads .env
+  }
   await Preferences.init();
 
   runApp(
@@ -21,10 +25,6 @@ void main() async {
       ],
       child: const MyApp(),
     ),
-    // ChangeNotifierProvider(
-    //   create: (_) => CarProvider(),
-    //   child: const MyApp(),
-    // ),
   );
 }
 

@@ -11,7 +11,7 @@ class RouteGenerator {
       case AppRoute.home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case AppRoute.carDetail:
-        if (args is int) {
+        if (args is String) {
           return MaterialPageRoute(
             builder: (_) => CarDetailScreen(carId: args),
           );
