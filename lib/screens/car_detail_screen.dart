@@ -67,7 +67,7 @@ class CarDetailScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // ── Info row ───────────────────────────────────────────
+                  // Info row
                   Expanded(
                     child: Container(
                       height: size.height,
@@ -112,7 +112,7 @@ class CarDetailScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: Constants.kDefaultPadding*3),
-                            // ── Track / Stop button
+                            //Track / Stop button
                             AppButton(
                               onPressed: (){
                                 if (isTracked) {
