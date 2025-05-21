@@ -1,5 +1,7 @@
 import 'package:fleet_monitoring_app/core/routes/app_route.dart';
+import 'package:fleet_monitoring_app/core/utils/images.dart';
 import 'package:fleet_monitoring_app/screens/components/search_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'dart:async';
@@ -8,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../core/config/constants.dart';
 import '../core/config/preferences.dart';
+import '../core/utils/loading.dart';
 import '../models/car.dart';
 import '../providers/car_provider.dart';
 
@@ -20,19 +23,24 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   GoogleMapController? _mapController;
-
+  bool _iconsReady = false;
   String _searchQuery = '';
   String? _statusFilter; // 'Moving', 'Parked', or null
   CameraPosition _initialCamera = const CameraPosition(target: LatLng(-1.95, 30.06), zoom: 13);
 
   // preload marker icons
-  late BitmapDescriptor _movingIcon;
-  late BitmapDescriptor _parkedIcon;
+  BitmapDescriptor _movingIcon  = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor _parkedIcon  = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor _trackedIcon = BitmapDescriptor.defaultMarker;
 
   // ── Restore last camera pos
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showLoadingDialog(context);
+
+    });
     _loadIcons();
     final pos = Preferences.getLastMapPosition();
     if (pos != null) {
@@ -43,12 +51,20 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-
   Future<void> _loadIcons() async {
-    _movingIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
-    _parkedIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
-  }
+    if (kIsWeb) {
+      _movingIcon = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(48, 48)), ImagePath.movingCar,);
+      _parkedIcon = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(48, 48)), ImagePath.parkedCar,);
+      _trackedIcon = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(48, 48)), ImagePath.trackedCar,);
 
+    } else {
+      _movingIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+      _parkedIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
+      _trackedIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
+    }
+    if (context.mounted) Navigator.of(context).pop();
+    setState(() => _iconsReady = true);
+  }
 
   // Persist camera pos on move
   void _onCameraMove(CameraPosition position) {
@@ -61,15 +77,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Build marker set
   Set<Marker> _buildMarkers(List<Car> cars) {
+    final provider = context.read<CarProvider>();
+    final trackedId = provider.trackedCarId;
+
     return cars.map((car) {
+      final isTracked = car.id == trackedId;
+      final icon = isTracked
+          ? _trackedIcon
+          : car.status == 'Moving'
+          ? _movingIcon
+          : _parkedIcon;
+
       return Marker(
         markerId: MarkerId(car.id.toString()),
         position: LatLng(car.latitude, car.longitude),
         infoWindow: InfoWindow(title: car.name, snippet: '${car.speed} km/h'),
-        icon:  car.status == 'Moving' ? _movingIcon : _parkedIcon,
+        icon: icon,
         onTap: () {
-          Navigator.pushNamed(context,
-              AppRoute.carDetail, arguments: car.id);
+          Navigator.pushNamed(context, AppRoute.carDetail, arguments: car.id);
         },
       );
     }).toSet();
@@ -90,13 +115,16 @@ class _HomeScreenState extends State<HomeScreen> {
   void _maybeFollowTracked(CarProvider provider) {
     final id = provider.trackedCarId;
     if (id == null || _mapController == null) return;
+
     final car = provider.getCarById(id);
     if (car == null) return;
 
     _mapController!.animateCamera(
-      CameraUpdate.newLatLng(LatLng(car.latitude, car.longitude)),
+      CameraUpdate.newLatLng(LatLng(car.latitude, car.longitude),
+      ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
