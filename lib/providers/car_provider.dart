@@ -9,7 +9,7 @@ class CarProvider with ChangeNotifier {
   List<Car> _cars = [];
   bool _isLoading = false;
   String? _error;
-  String? _trackedCarId; // Changed from int? to String?
+  String? _trackedCarId;
 
   List<Car> get cars => _cars;
   bool get isLoading => _isLoading;
@@ -122,6 +122,6 @@ class CarProvider with ChangeNotifier {
     final q = query.toLowerCase();
     return _cars.where((car) =>
     car.name.toLowerCase().contains(q) ||
-        car.id.toLowerCase().contains(q)).toList(); // id is now String
+        car.id.toLowerCase().contains(q)).toList();
   }
 }

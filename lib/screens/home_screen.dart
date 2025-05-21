@@ -11,7 +11,6 @@ import '../core/config/preferences.dart';
 import '../core/utils/loading.dart';
 import '../models/car.dart';
 import '../providers/car_provider.dart';
-import 'car_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -52,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-  // ── Persist camera pos on move ───────────────────────────────────────────
+  // Persist camera pos on move
   void _onCameraMove(CameraPosition position) {
     Preferences.setLastMapPosition(
       position.target.latitude,
@@ -61,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ── Build marker set ─────────────────────────────────────────────────────
+  // Build marker set
   Set<Marker> _buildMarkers(List<Car> cars) {
     return cars.map((car) {
       return Marker(
@@ -77,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }).toSet();
   }
 
-  // // ── Search + filter logic ────────────────────────────────────────────────
+  // Search + filter logic
   List<Car> _applySearchAndFilter(List<Car> cars) {
     final provider = context.read<CarProvider>();
 
@@ -88,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return list;
   }
 
-  // ── Follow tracked car ───────────────────────────────────────────────────
+  // Follow tracked car
   void _maybeFollowTracked(CarProvider provider) {
     final id = provider.trackedCarId;
     if (id == null || _mapController == null) return;
@@ -102,8 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Let provider know our BuildContext so it can show toasts if needed
     context.read<CarProvider>().setContext(context);
+
     final ThemeData theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(

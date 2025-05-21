@@ -20,8 +20,7 @@ class CarService {
         final List<dynamic> data = json.decode(response.body);
         return data.map((json) => Car.fromJson(json)).toList();
       } else {
-        showWarningToast(context,
-            "Failed to load cars (${response.statusCode})");
+        showWarningToast(context, "Failed to load cars (${response.statusCode})");
         return null;
       }
     } catch (e) {
