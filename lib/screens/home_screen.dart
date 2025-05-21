@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 
 import '../core/config/constants.dart';
 import '../core/config/preferences.dart';
-import '../core/utils/loading.dart';
 import '../models/car.dart';
 import '../providers/car_provider.dart';
 
@@ -30,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late BitmapDescriptor _movingIcon;
   late BitmapDescriptor _parkedIcon;
 
-  // ── Restore last camera pos ──────────────────────────────────────────────
+  // ── Restore last camera pos
   @override
   void initState() {
     super.initState();
@@ -132,70 +131,41 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-              
-                  // SEARCH BAR
+
+                  //SEARCH BAR
                   Positioned(
                     top: Constants.kDefaultPadding,
                     left: Constants.kDefaultPadding,
-                    right: Constants.kDefaultPadding,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: Constants.kDefaultPadding),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: SearchWidget(
-                              hintText: 'Search a car by name or ID',
-                              keyboardType: TextInputType.name,
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  Icons.search,
-                                  color: theme.colorScheme.onSurface.withOpacity(0.5),
-                                ),
-                                onPressed: () {},
-                              ),
-                              onChanged: (v) => setState(() => _searchQuery = v),
-              
-                              validator: (String? value) {},
-                            ),
-                          ),
-                          const SizedBox(width: Constants.kDefaultPadding,),
-                          // ── FILTER BUTTON ──────────────────────────────────────
-                          Positioned(
-                            top: 80,
-                            right: 16,
-                            child: FloatingActionButton.small(
-                              heroTag: 'filterBtn',
-                              backgroundColor:  Theme.of(context).cardColor,
-                              onPressed: () async {
-                                final choice = await showModalBottomSheet(
-                                  context: context,
-                                  backgroundColor: Theme.of(context).cardColor,
-                                  builder: (BuildContext context) {
-                                    return  _FilterSheet(current: _statusFilter);
-                                  },
-                                );
-              
-                                if (choice != null) {
-                                  setState(() => _statusFilter = choice == 'All'
-                                      ? null
-                                      : choice);
-                                }
-                              },
-                              child: Icon(Icons.filter_list,color: theme.colorScheme.onSurface.withOpacity(0.5)),
-                            ),
-                          ),
-                        ],
-                      ),
+                    right: Constants.kDefaultPadding + 56,
+                    child: SearchWidget(
+                      hintText: 'Search by name or ID',
+                      keyboardType: TextInputType.text,
+                      onChanged: (v) => setState(() => _searchQuery = v),
                     ),
                   ),
-              
-                  // if (provider.isLoading)
-                  //   const Positioned(
-                  //     bottom: 20,
-                  //     left: 0,
-                  //     right: 0,
-                  //     child: Center(child: CircularProgressIndicator()),
-                  //   ),
+
+                  // FILTER FAB
+                  Positioned(
+                    top: Constants.kDefaultPadding,
+                    right: Constants.kDefaultPadding,
+                    child: FloatingActionButton.small(
+                      heroTag: 'filterBtn',
+                      backgroundColor: theme.cardColor,
+                      onPressed: () async {
+                        final choice = await showModalBottomSheet<String?>(
+                          context: context,
+                          backgroundColor: theme.cardColor,
+                          builder: (_) => _FilterSheet(current: _statusFilter),
+                        );
+                        if (choice != null) {
+                          setState(() =>
+                          _statusFilter = choice == 'All' ? null : choice);
+                        }
+                      },
+                      child: Icon(Icons.filter_list,
+                          color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                    ),
+                  ),
                 ],
               ),
             );
