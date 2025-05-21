@@ -11,7 +11,7 @@ Built in Flutter using real-time polling, state management (Provider for this ca
 
 ## 🌐 Live Demo
 
-👉 Try it on the web: [fleet-monitoring.vercel.app](https://fleet-monitoring.vercel.app)
+👉 Try it on the web: [fleet-monitoring.vercel.app](https://fleet-monitoring-app-v2.vercel.app/)
 
 ---
 
